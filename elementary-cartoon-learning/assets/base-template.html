@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识点学习网页</title>
+<style>
+/* ========== CSS 变量 — 按学科修改 ========== */
+:root {
+  --primary: #3498DB;       /* 主色 — 按学科替换 */
+  --secondary: #AED6F1;     /* 辅色 */
+  --bg-grad-start: #EBF5FB; /* 背景渐变起点 */
+  --bg-grad-end: #D6EAF8;   /* 背景渐变终点 */
+  
+  --color-correct: #2ECC71;
+  --color-wrong: #E74C3C;
+  --color-star: #F1C40F;
+  --color-bg-card: #FFFFFF;
+  --color-text-main: #2C3E50;
+  --color-text-light: #7F8C8D;
+  
+  --fs-hero: 36px;
+  --fs-h1: 28px;
+  --fs-h2: 22px;
+  --fs-body: 18px;
+  --fs-large: 24px;
+  --fs-button: 20px;
+  --fs-caption: 14px;
+}
+
+/* ========== 重置与全局 ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: "Comic Sans MS", "YouYuan", "幼圆", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: var(--fs-body);
+  line-height: 1.8;
+  color: var(--color-text-main);
+  background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ========== 进度条头部 ========== */
+.progress-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border-radius: 0 0 16px 16px;
+  transition: transform 0.3s;
+}
+.progress-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.mascot-mini { font-size: 28px; animation: wobble 2s ease-in-out infinite; }
+.progress-label { font-size: var(--fs-caption); color: var(--color-text-light); white-space: nowrap; }
+.progress-bar {
+  flex: 1;
+  max-width: 200px;
+  height: 20px;
+  background: #E0E0E0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(52,152,219,0.5);
+}
+.progress-percent { font-weight: 700; font-size: var(--fs-caption); white-space: nowrap; }
+.star-counter {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-star);
+}
+
+/* ========== 容器 ========== */
+.container {
+  max-width: 100%;
+  padding: 16px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) { .container { max-width: 720px; padding: 24px; } }
+@media (min-width: 1024px) { .container { max-width: 900px; padding: 32px; } }
+
+/* ========== 封面区 ========== */
+.hero-section {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+.hero-mascot { font-size: 80px; animation: float 3s ease-in-out infinite; margin-bottom: 20px; }
+.hero-title {
+  font-size: var(--fs-hero);
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+.hero-subtitle { font-size: var(--fs-h2); color: var(--color-text-light); margin-bottom: 32px; }
+.hero-decoration { font-size: 40px; margin: 16px 0; animation: wobble 2s ease-in-out infinite; }
+
+/* ========== 卡片 ========== */
+.card {
+  background: var(--color-bg-card);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  border: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+
+/* ========== 按钮 ========== */
+.btn {
+  padding: 14px 32px;
+  font-size: var(--fs-button);
+  font-weight: 700;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn:hover { transform: scale(1.05); }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-large { padding: 18px 48px; font-size: var(--fs-large); }
+.btn-secondary { background: linear-gradient(135deg, #95A5A6, #BDC3C7); }
+
+/* ========== 知识讲解区 ========== */
+.lesson-section { padding: 20px 0; }
+.lesson-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.lesson-mascot {
+  font-size: 56px;
+  animation: wobble 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.speech-bubble {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  border: 2px solid var(--primary);
+  flex: 1;
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 30px;
+  border: 6px solid transparent;
+  border-top-color: var(--primary);
+}
+.lesson-stage {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: var(--bg-grad-start);
+  border-radius: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.lesson-stage .big-emoji { font-size: 72px; margin-bottom: 16px; }
+.lesson-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.step-indicator {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--color-text-light);
+}
+
+/* ========== 测验区 ========== */
+.quiz-section { padding: 20px 0; }
+.quiz-section h2 {
+  font-size: var(--fs-h1);
+  color: var(--primary);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.quiz-card { margin-bottom: 20px; }
+.quiz-card h3 { font-size: var(--fs-h2); margin-bottom: 12px; }
+.question-star { color: var(--color-star); }
+.question-text { font-size: var(--fs-large); margin-bottom: 16px; }
+.options { display: flex; flex-direction: column; gap: 12px; }
+.option-btn {
+  padding: 16px 20px;
+  font-size: var(--fs-body);
+  border: 3px solid #E0E0E0;
+  border-radius: 16px;
+  background: #FAFAFA;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: inherit;
+}
+.option-btn:hover { border-color: var(--primary); background: var(--bg-grad-start); }
+.option-btn.correct { border-color: var(--color-correct); background: #EAFAF1; }
+.option-btn.wrong { border-color: var(--color-wrong); background: #FDEDEC; }
+.option-btn:disabled { cursor: not-allowed; }
+.fill-input {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: var(--fs-body);
+  border: 3px solid #E0E0E0;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  font-family: inherit;
+}
+.fill-input:focus { outline: none; border-color: var(--primary); }
+.fill-input.correct { border-color: var(--color-correct); background: #EAFAF1; }
+.fill-input.wrong { border-color: var(--color-wrong); background: #FDEDEC; }
+.feedback { margin-top: 12px; padding: 12px 16px; border-radius: 12px; }
+.feedback-correct { background: #EAFAF1; color: var(--color-correct); }
+.feedback-wrong { background: #FEF5E7; color: var(--color-wrong); }
+.quiz-result {
+  text-align: center;
+  padding: 40px 20px;
+  animation: bounceIn 0.5s ease;
+}
+.quiz-result h3 { font-size: var(--fs-h1); margin: 16px 0; color: var(--primary); }
+.quiz-result p { font-size: var(--fs-large); color: var(--color-text-light); margin-bottom: 24px; }
+
+/* ========== 拖拽游戏区 ========== */
+.game-section { padding: 20px 0; }
+.game-section h2 {
+  font-size: var(--fs-h1);
+  color: var(--primary);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.game-instruction {
+  text-align: center;
+  font-size: var(--fs-body);
+  color: var(--color-text-light);
+  margin-bottom: 24px;
+}
+.drag-game-area {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+}
+.drag-items, .drop-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.drag-item {
+  width: 100px;
+  height: 100px;
+  background: white;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  cursor: grab;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  border: 3px solid var(--primary);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.2s;
+  touch-action: none;
+}
+.drag-item:active { cursor: grabbing; transform: scale(1.1); }
+.drag-item.dragging { opacity: 0.5; }
+.drop-zone {
+  min-width: 120px;
+  min-height: 100px;
+  border: 3px dashed var(--primary);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  padding: 12px;
+  text-align: center;
+  transition: all 0.3s;
+  background: rgba(255,255,255,0.5);
+}
+.drop-zone.drag-over {
+  background: var(--secondary);
+  border-style: solid;
+  transform: scale(1.05);
+}
+.drop-zone.matched {
+  background: var(--color-correct);
+  color: white;
+  border-color: var(--color-correct);
+  border-style: solid;
+}
+.game-feedback {
+  text-align: center;
+  font-size: var(--fs-large);
+  font-weight: 700;
+  min-height: 36px;
+  margin-top: 20px;
+}
+
+/* ========== 完成总结区 ========== */
+.completion-section {
+  text-align: center;
+  padding: 60px 20px;
+  animation: bounceIn 0.5s ease;
+}
+.badge {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  background: linear-gradient(135deg, #F1C40F, #E67E22);
+  box-shadow: 0 4px 15px rgba(241,196,15,0.4);
+  border: 4px solid #FFFFFF;
+  margin: 0 auto 24px;
+}
+.large-badge { width: 100px; height: 100px; font-size: 48px; }
+.completion-section h2 {
+  font-size: var(--fs-hero);
+  color: var(--primary);
+  margin-bottom: 16px;
+}
+.completion-section p { font-size: var(--fs-large); margin-bottom: 24px; }
+.star-display { font-size: 32px; margin-bottom: 32px; letter-spacing: 4px; }
+
+/* ========== 动画 ========== */
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes wobble {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes starPop {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1.3) rotate(180deg); }
+  100% { transform: scale(1) rotate(360deg); opacity: 1; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+@keyframes starFly {
+  0% { transform: scale(0) translateY(0); opacity: 1; }
+  50% { transform: scale(1.5) translateY(-50px); opacity: 1; }
+  100% { transform: scale(0.5) translateY(-150px); opacity: 0; }
+}
+.animate-bounce-in { animation: bounceIn 0.4s ease; }
+.flying-star {
+  position: fixed;
+  font-size: 30px;
+  pointer-events: none;
+  animation: starFly 1s ease-out forwards;
+  z-index: 9999;
+}
+
+/* ========== 隐藏控制 ========== */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ========== 进度条头部 ========== -->
+<div class="progress-header" id="progressHeader" style="display:none;">
+  <div class="progress-info">
+    <span class="mascot-mini">🦊</span>
+    <span class="progress-label">学习进度</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <span class="progress-percent" id="progressPercent">0%</span>
+  </div>
+  <div class="star-counter">
+    <span>⭐</span>
+    <span id="starCount">0</span>
+  </div>
+</div>
+
+<!-- ========== 封面区 ========== -->
+<div class="container">
+  <div class="hero-section" id="heroSection">
+    <div class="hero-decoration">🎈</div>
+    <div class="hero-mascot">🦊</div>
+    <h1 class="hero-title" id="heroTitle">知识点标题</h1>
+    <p class="hero-subtitle" id="heroSubtitle">副标题 / 学科 · 年级</p>
+    <div class="hero-decoration">✨</div>
+    <button class="btn btn-large" onclick="startLearning()">开始学习 🚀</button>
+  </div>
+
+  <!-- ========== 知识讲解区 ========== -->
+  <div class="lesson-section hidden" id="lessonSection">
+    <div class="lesson-header">
+      <span class="lesson-mascot" id="lessonMascot">🦊</span>
+      <div class="speech-bubble">
+        <p id="lessonText">欢迎来到学习小课堂！</p>
+      </div>
+    </div>
+    <div class="lesson-stage" id="lessonStage"></div>
+    <div class="lesson-controls">
+      <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()">⬅️ 上一步</button>
+      <div class="step-indicator">
+        <span id="currentStep">1</span> / <span id="totalSteps">1</span>
+      </div>
+      <button class="btn" id="nextBtn" onclick="nextStep()">下一步 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ========== 测验区 ========== -->
+  <div class="quiz-section hidden" id="quizSection">
+    <h2>📝 随堂小测验</h2>
+    <div id="quizContainer"></div>
+    <div class="quiz-result hidden" id="quizResult">
+      <div class="badge">🏆</div>
+      <h3 id="resultTitle">太棒了！</h3>
+      <p id="resultScore"></p>
+      <button class="btn" onclick="resetQuiz()">再做一次 🔄</button>
+    </div>
+  </div>
+
+  <!-- ========== 拖拽游戏区 ========== -->
+  <div class="game-section hidden" id="gameSection">
+    <h2>🎮 互动小游戏</h2>
+    <p class="game-instruction" id="gameInstruction">把左边的图片拖到右边对应的答案上！</p>
+    <div class="drag-game-area">
+      <div class="drag-items" id="dragItems"></div>
+      <div class="drop-zones" id="dropZones"></div>
+    </div>
+    <div class="game-feedback" id="gameFeedback"></div>
+  </div>
+
+  <!-- ========== 完成总结区 ========== -->
+  <div class="completion-section hidden" id="completionSection">
+    <div class="badge large-badge">🏆</div>
+    <h2>恭喜完成学习！</h2>
+    <p id="completionText"></p>
+    <div class="star-display" id="starDisplay"></div>
+    <button class="btn btn-large" onclick="location.reload()">再学一次 🔄</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+ *  全局状态
+ * ============================================================ */
+let totalProgress = 0;
+let totalStars = 0;
+let currentStepIndex = 0;
+
+/* ============================================================
+ *  数据区 — 按具体知识点填充以下数据
+ * ============================================================ */
+
+// 知识讲解步骤数据
+const lessonSteps = [
+  {
+    text: "欢迎来到学习小课堂！点击「下一步」开始吧～",
+    stage: '<div class="big-emoji">📚</div><p>准备好了吗？</p>',
+    mascot: "🦊"
+  },
+  // TODO: 添加更多步骤
+];
+
+// 测验题目数据
+const quizQuestions = [
+  {
+    type: "choice",
+    question: "示例题目？",
+    options: ["选项A", "选项B", "选项C", "选项D"],
+    answer: 0,
+    explanation: "解析说明"
+  },
+  // TODO: 添加更多题目
+];
+
+// 拖拽游戏数据
+const dragGameData = [
+  { item: "🍎", match: "答案A", id: 0 },
+  // TODO: 添加更多数据
+];
+
+/* ============================================================
+ *  通用功能
+ * ============================================================ */
+function updateProgress(percent) {
+  totalProgress = Math.max(totalProgress, percent);
+  document.getElementById('progressFill').style.width = totalProgress + '%';
+  document.getElementById('progressPercent').textContent = Math.round(totalProgress) + '%';
+  if (totalProgress >= 100) {
+    setTimeout(showCompletion, 1000);
+  }
+}
+
+function showStarAnimation() {
+  totalStars++;
+  document.getElementById('starCount').textContent = totalStars;
+  const star = document.createElement('div');
+  star.className = 'flying-star';
+  star.textContent = '⭐';
+  const rect = document.querySelector('.star-counter').getBoundingClientRect();
+  star.style.left = rect.left + 'px';
+  star.style.top = rect.top + 'px';
+  document.body.appendChild(star);
+  setTimeout(() => star.remove(), 1000);
+}
+
+function showCompletion() {
+  const section = document.getElementById('completionSection');
+  const text = document.getElementById('completionText');
+  const stars = document.getElementById('starDisplay');
+  let message = '';
+  if (totalStars >= 8) {
+    message = '你简直是学习小天才！🌟';
+  } else if (totalStars >= 5) {
+    message = '做得太棒了！继续加油！👍';
+  } else {
+    message = '完成了学习，下次可以做得更好！😊';
+  }
+  text.textContent = message;
+  stars.innerHTML = '⭐'.repeat(totalStars) + '☆'.repeat(Math.max(0, 10 - totalStars));
+  section.classList.remove('hidden');
+  section.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ============================================================
+ *  开始学习
+ * ============================================================ */
+function startLearning() {
+  document.getElementById('heroSection').classList.add('hidden');
+  document.getElementById('progressHeader').style.display = 'flex';
+  document.getElementById('lessonSection').classList.remove('hidden');
+  document.getElementById('quizSection').classList.remove('hidden');
+  document.getElementById('gameSection').classList.remove('hidden');
+  showStep(0);
+  renderQuiz();
+  initDragGame();
+  document.getElementById('lessonSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ============================================================
+ *  知识讲解
+ * ============================================================ */
+function showStep(index) {
+  const step = lessonSteps[index];
+  document.getElementById('lessonText').textContent = step.text;
+  document.getElementById('lessonStage').innerHTML = step.stage;
+  document.getElementById('lessonMascot').textContent = step.mascot || '🦊';
+  document.getElementById('currentStep').textContent = index + 1;
+  document.getElementById('totalSteps').textContent = lessonSteps.length;
+  document.getElementById('prevBtn').disabled = index === 0;
+  document.getElementById('nextBtn').textContent =
+    index === lessonSteps.length - 1 ? '完成讲解 ✅' : '下一步 ➡️';
+  
+  const stage = document.getElementById('lessonStage');
+  stage.classList.remove('animate-bounce-in');
+  void stage.offsetWidth;
+  stage.classList.add('animate-bounce-in');
+  
+  if (lessonSteps.length > 0) {
+    updateProgress((index + 1) / lessonSteps.length * 40);
+  }
+}
+
+function nextStep() {
+  if (currentStepIndex < lessonSteps.length - 1) {
+    currentStepIndex++;
+    showStep(currentStepIndex);
+  } else {
+    document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function prevStep() {
+  if (currentStepIndex > 0) {
+    currentStepIndex--;
+    showStep(currentStepIndex);
+  }
+}
+
+/* ============================================================
+ *  随堂小测验
+ * ============================================================ */
+let quizAnswers = [];
+
+function renderQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  quizQuestions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'card quiz-card';
+    card.id = `quiz-${i}`;
+    if (q.type === 'choice') {
+      card.innerHTML = `
+        <h3>第 ${i + 1} 题 <span class="question-star">⭐</span></h3>
+        <p class="question-text">${q.question}</p>
+        <div class="options">
+          ${q.options.map((opt, j) => `
+            <button class="option-btn" onclick="checkAnswer(${i}, ${j})">
+              ${String.fromCharCode(65 + j)}. ${opt}
+            </button>
+          `).join('')}
+        </div>
+        <div class="feedback" id="feedback-${i}"></div>
+      `;
+    } else if (q.type === 'fill') {
+      card.innerHTML = `
+        <h3>第 ${i + 1} 题 <span class="question-star">⭐</span></h3>
+        <p class="question-text">${q.question}</p>
+        <input type="text" class="fill-input" id="input-${i}"
+               placeholder="在这里输入答案..."
+               onkeypress="if(event.key==='Enter') checkFillAnswer(${i})">
+        <button class="btn" onclick="checkFillAnswer(${i})">提交 ✅</button>
+        <div class="feedback" id="feedback-${i}"></div>
+      `;
+    }
+    container.appendChild(card);
+  });
+}
+
+function checkAnswer(qIndex, selected) {
+  const q = quizQuestions[qIndex];
+  const card = document.getElementById(`quiz-${qIndex}`);
+  const feedback = document.getElementById(`feedback-${qIndex}`);
+  const buttons = card.querySelectorAll('.option-btn');
+  buttons.forEach(btn => btn.disabled = true);
+  if (selected === q.answer) {
+    buttons[selected].classList.add('correct');
+    feedback.innerHTML = `<div class="feedback feedback-correct">🎉 答对了！${q.explanation}</div>`;
+    quizAnswers[qIndex] = true;
+    showStarAnimation();
+  } else {
+    buttons[selected].classList.add('wrong');
+    buttons[q.answer].classList.add('correct');
+    feedback.innerHTML = `<div class="feedback feedback-wrong">💪 差一点点！${q.explanation}</div>`;
+    quizAnswers[qIndex] = false;
+  }
+  checkQuizComplete();
+}
+
+function checkFillAnswer(qIndex) {
+  const q = quizQuestions[qIndex];
+  const input = document.getElementById(`input-${qIndex}`);
+  const feedback = document.getElementById(`feedback-${qIndex}`);
+  const userAnswer = input.value.trim();
+  if (!userAnswer) return;
+  input.disabled = true;
+  if (userAnswer === q.answer) {
+    input.classList.add('correct');
+    feedback.innerHTML = `<div class="feedback feedback-correct">🎉 答对了！${q.explanation}</div>`;
+    quizAnswers[qIndex] = true;
+    showStarAnimation();
+  } else {
+    input.classList.add('wrong');
+    feedback.innerHTML = `<div class="feedback feedback-wrong">💪 再想想！正确答案是：${q.answer}。${q.explanation}</div>`;
+    quizAnswers[qIndex] = false;
+  }
+  checkQuizComplete();
+}
+
+function checkQuizComplete() {
+  const answered = quizAnswers.filter(a => a !== undefined).length;
+  if (answered === quizQuestions.length) {
+    setTimeout(() => {
+      const correct = quizAnswers.filter(a => a === true).length;
+      const result = document.getElementById('quizResult');
+      const title = document.getElementById('resultTitle');
+      const score = document.getElementById('resultScore');
+      if (correct === quizQuestions.length) {
+        title.textContent = '全对了！太厉害了！🌟';
+      } else if (correct >= quizQuestions.length * 0.6) {
+        title.textContent = '做得不错！继续加油！👍';
+      } else {
+        title.textContent = '没关系，多练习就会更好！😊';
+      }
+      score.textContent = `答对 ${correct} / ${quizQuestions.length} 题，获得 ${correct} ⭐`;
+      result.classList.remove('hidden');
+      updateProgress(80);
+      document.getElementById('gameSection').scrollIntoView({ behavior: 'smooth' });
+    }, 800);
+  }
+}
+
+function resetQuiz() {
+  quizAnswers = [];
+  document.getElementById('quizResult').classList.add('hidden');
+  renderQuiz();
+}
+
+/* ============================================================
+ *  拖拽游戏
+ * ============================================================ */
+let draggedElement = null;
+
+function initDragGame() {
+  const itemsContainer = document.getElementById('dragItems');
+  const zonesContainer = document.getElementById('dropZones');
+  itemsContainer.innerHTML = '';
+  zonesContainer.innerHTML = '';
+  
+  const shuffledItems = [...dragGameData].sort(() => Math.random() - 0.5);
+  const shuffledZones = [...dragGameData].sort(() => Math.random() - 0.5);
+  
+  shuffledItems.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'drag-item';
+    el.draggable = true;
+    el.textContent = d.item;
+    el.dataset.id = d.id;
+    el.addEventListener('dragstart', onDragStart);
+    el.addEventListener('dragend', onDragEnd);
+    itemsContainer.appendChild(el);
+  });
+  
+  shuffledZones.forEach(d => {
+    const zone = document.createElement('div');
+    zone.className = 'drop-zone';
+    zone.textContent = d.match;
+    zone.dataset.id = d.id;
+    zone.addEventListener('dragover', onDragOver);
+    zone.addEventListener('dragleave', onDragLeave);
+    zone.addEventListener('drop', onDrop);
+    zonesContainer.appendChild(zone);
+  });
+  
+  setupTouchDrag();
+}
+
+function onDragStart(e) {
+  draggedElement = e.target;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onDragEnd(e) {
+  e.target.classList.remove('dragging');
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  if (!e.currentTarget.classList.contains('matched')) {
+    e.currentTarget.classList.add('drag-over');
+  }
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  const zone = e.currentTarget;
+  zone.classList.remove('drag-over');
+  if (zone.classList.contains('matched')) return;
+  const draggedId = draggedElement.dataset.id;
+  const zoneId = zone.dataset.id;
+  if (draggedId === zoneId) {
+    zone.classList.add('matched');
+    zone.innerHTML += `<br><span style="font-size:32px">${draggedElement.textContent}</span>`;
+    draggedElement.style.visibility = 'hidden';
+    showGameFeedback('🎉 配对成功！', true);
+    showStarAnimation();
+    checkGameComplete();
+  } else {
+    showGameFeedback('💪 再试一次！', false);
+    zone.style.animation = 'shake 0.3s';
+    setTimeout(() => zone.style.animation = '', 300);
+  }
+}
+
+function showGameFeedback(msg, correct) {
+  const fb = document.getElementById('gameFeedback');
+  fb.textContent = msg;
+  fb.style.color = correct ? 'var(--color-correct)' : 'var(--color-wrong)';
+  setTimeout(() => { fb.textContent = ''; }, 2000);
+}
+
+function checkGameComplete() {
+  const matched = document.querySelectorAll('.drop-zone.matched').length;
+  if (matched === dragGameData.length) {
+    const fb = document.getElementById('gameFeedback');
+    fb.innerHTML = '🎊 全部配对成功！你真棒！获得 ' + dragGameData.length + ' ⭐';
+    fb.style.color = 'var(--color-correct)';
+    updateProgress(100);
+    setTimeout(() => {
+      document.getElementById('completionSection').scrollIntoView({ behavior: 'smooth' });
+    }, 2000);
+  }
+}
+
+/* 触摸设备拖拽支持 */
+function setupTouchDrag() {
+  document.querySelectorAll('.drag-item').forEach(item => {
+    let touchOffsetX, touchOffsetY;
+    let isDragging = false;
+    
+    item.addEventListener('touchstart', (e) => {
+      if (item.style.visibility === 'hidden') return;
+      const touch = e.touches[0];
+      const rect = item.getBoundingClientRect();
+      touchOffsetX = touch.clientX - rect.left;
+      touchOffsetY = touch.clientY - rect.top;
+      draggedElement = item;
+      isDragging = true;
+      item.classList.add('dragging');
+    }, { passive: true });
+    
+    item.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      item.style.position = 'fixed';
+      item.style.left = (touch.clientX - touchOffsetX) + 'px';
+      item.style.top = (touch.clientY - touchOffsetY) + 'px';
+      item.style.zIndex = '1000';
+      item.style.pointerEvents = 'none';
+    }, { passive: false });
+    
+    item.addEventListener('touchend', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      item.classList.remove('dragging');
+      item.style.position = '';
+      item.style.left = '';
+      item.style.top = '';
+      item.style.zIndex = '';
+      item.style.pointerEvents = '';
+      
+      const touch = e.changedTouches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      const zone = target ? target.closest('.drop-zone') : null;
+      if (zone && !zone.classList.contains('matched')) {
+        const fakeEvent = { preventDefault: () => {}, currentTarget: zone };
+        onDrop(fakeEvent);
+      }
+    });
+  });
+}
+</script>
+</body>
+</html>
